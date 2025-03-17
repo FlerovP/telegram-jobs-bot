@@ -7,11 +7,12 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-# Get database URL from environment variable
-DATABASE_URL = os.getenv('DATABASE_URL', 'postgresql://telegram_bot:password@localhost:5432/jobs_db')
+# Create database engine
+database_url = os.getenv('DATABASE_URL')
+if not database_url:
+    database_url = 'sqlite:///jobs.db'
 
-# Create SQLAlchemy engine
-engine = create_engine(DATABASE_URL)
+engine = create_engine(database_url)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
 
@@ -19,13 +20,13 @@ class Job(Base):
     __tablename__ = "jobs"
 
     id = Column(Integer, primary_key=True, index=True)
-    title = Column(String)
-    company = Column(String)
-    salary = Column(String)
+    title = Column(String(200))
+    company = Column(String(100))
+    salary = Column(String(100))
     requirements = Column(Text)
-    link = Column(String)
+    link = Column(String(500))
     created_at = Column(DateTime, default=datetime.utcnow)
-    source = Column(String)
+    source = Column(String(100))
     message_id = Column(Integer, unique=True)
 
 # Create tables
@@ -81,10 +82,9 @@ def job_exists(message_id: int) -> bool:
     finally:
         session.close()
 
-# Функция для получения всех активных вакансий
-def get_active_jobs():
+def get_all_jobs():
     session = SessionLocal()
     try:
-        return session.query(Job).filter_by(is_active=True).all()
+        return session.query(Job).all()
     finally:
         session.close() 
