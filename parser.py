@@ -1,6 +1,65 @@
 import re
 from typing import Dict, Optional
 
+def parse_job_message(text: str) -> Optional[Dict]:
+    """
+    Parse job information from a message text.
+    Returns a dictionary with job details or None if no job information is found.
+    """
+    # Basic validation
+    if not text or len(text.strip()) < 10:
+        return None
+
+    # Initialize job data
+    job_data = {
+        'title': None,
+        'company': None,
+        'salary': None,
+        'requirements': None,
+        'link': None,
+        'source': None
+    }
+
+    # Split text into lines
+    lines = text.split('\n')
+    
+    # First line is usually the title
+    if lines:
+        job_data['title'] = lines[0].strip()
+    
+    # Look for company name (usually after title)
+    company_pattern = r'(компания|работодатель|работодатель:)\s*[:]?\s*([^\n]+)'
+    company_match = re.search(company_pattern, text, re.IGNORECASE)
+    if company_match:
+        job_data['company'] = company_match.group(2).strip()
+    
+    # Look for salary
+    salary_pattern = r'(зарплата|оплата|доход)\s*[:]?\s*([^\n]+)'
+    salary_match = re.search(salary_pattern, text, re.IGNORECASE)
+    if salary_match:
+        job_data['salary'] = salary_match.group(2).strip()
+    
+    # Look for requirements
+    requirements_pattern = r'(требования|требуется|квалификация)\s*[:]?\s*([^\n]+)'
+    requirements_match = re.search(requirements_pattern, text, re.IGNORECASE)
+    if requirements_match:
+        job_data['requirements'] = requirements_match.group(2).strip()
+    
+    # Look for links
+    url_pattern = r'https?://[^\s<>"]+|www\.[^\s<>"]+'
+    urls = re.findall(url_pattern, text)
+    if urls:
+        job_data['link'] = urls[0]
+    
+    # Set source
+    job_data['source'] = 'telegram'
+    
+    # Return None if no title was found
+    if not job_data['title']:
+        return None
+        
+    return job_data
+
 class JobParser:
     def __init__(self):
         # Регулярные выражения для извлечения информации
