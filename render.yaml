@@ -1,4 +1,16 @@
 services:
+  - type: postgres
+    name: telegram-jobs-db
+    region: frankfurt
+    plan: free
+    envVars:
+      - key: POSTGRES_USER
+        value: telegram_bot
+      - key: POSTGRES_PASSWORD
+        sync: false
+      - key: POSTGRES_DB
+        value: jobs_db
+
   - type: worker
     name: telegram-jobs-bot
     env: python
@@ -11,4 +23,8 @@ services:
       - key: PYTHON_VERSION
         value: 3.9.18
       - key: TELEGRAM_BOT_TOKEN
-        sync: false 
+        sync: false
+      - key: DATABASE_URL
+        fromDatabase:
+          name: telegram-jobs-db
+          property: connectionString 
