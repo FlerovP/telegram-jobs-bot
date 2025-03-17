@@ -2,20 +2,27 @@
 
 Бот для сбора вакансий из Telegram-групп и каналов. Бот автоматически отслеживает новые сообщения, извлекает информацию о вакансиях и сохраняет их в базу данных.
 
-## Возможности
+## Развертывание на Render.com
 
-- Автоматический сбор вакансий из Telegram-групп
-- Извлечение ключевой информации: заголовок, компания, зарплата, требования и т.д.
-- Сохранение вакансий в базу данных SQLite
-- Предотвращение дублирования вакансий
-- Простой интерфейс управления через команды бота
+1. Форкните этот репозиторий
+2. Зарегистрируйтесь на [Render.com](https://render.com)
+3. Создайте новый Web Service:
+   - Подключите ваш GitHub репозиторий
+   - Выберите ветку `main`
+   - Выберите тип "Worker"
+   - Укажите имя сервиса
+   - Environment: Python 3
+   - Build Command: `pip install -r requirements.txt`
+   - Start Command: `python bot.py`
+4. Добавьте переменную окружения:
+   - `TELEGRAM_BOT_TOKEN`: ваш токен бота от @BotFather
 
-## Установка
+## Локальная разработка
 
 1. Клонируйте репозиторий:
 ```bash
-git clone <repository-url>
-cd telegram_jobs_bot
+git clone https://github.com/YOUR_USERNAME/telegram-jobs-bot.git
+cd telegram-jobs-bot
 ```
 
 2. Создайте виртуальное окружение и активируйте его:
@@ -31,22 +38,15 @@ venv\Scripts\activate  # для Windows
 pip install -r requirements.txt
 ```
 
-4. Создайте файл .env и добавьте необходимые переменные окружения:
+4. Создайте файл .env и добавьте токен бота:
 ```
 TELEGRAM_BOT_TOKEN=your_bot_token_here
-DATABASE_URL=sqlite:///jobs.db
-LOG_LEVEL=INFO
 ```
 
-## Использование
-
-1. Получите токен бота у [@BotFather](https://t.me/BotFather)
-2. Добавьте токен в файл .env
-3. Запустите бота:
+5. Запустите бота:
 ```bash
 python bot.py
 ```
-4. Добавьте бота в группы, где публикуются вакансии
 
 ## Команды бота
 
@@ -61,6 +61,7 @@ python bot.py
 - `parser.py` - Модуль для парсинга сообщений
 - `requirements.txt` - Зависимости проекта
 - `.env` - Конфигурационный файл
+- `render.yaml` - Конфигурация для развертывания на Render.com
 
 # Job Search Telegram Bot
 
