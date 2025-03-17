@@ -5,6 +5,9 @@ from telegram import Update
 from telegram.ext import Application, CommandHandler, MessageHandler, ContextTypes, filters
 from database import init_db, create_job, job_exists, get_all_jobs
 from parser import parse_job_message
+from flask import Flask
+import threading
+from telegram.ext import Updater, Filters
 
 # Загружаем переменные окружения
 load_dotenv()
@@ -18,6 +21,16 @@ logger = logging.getLogger(__name__)
 
 # Инициализируем базу данных
 init_db()
+
+app = Flask(__name__)
+
+@app.route('/')
+def home():
+    return 'Bot is running!'
+
+def run_flask():
+    port = int(os.environ.get('PORT', 8080))
+    app.run(host='0.0.0.0', port=port)
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Обработчик команды /start"""
@@ -73,26 +86,18 @@ async def process_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         logger.error(f"Error saving job: {e}")
 
 def main():
-    """Основная функция запуска бота"""
-    # Получаем токен бота из переменной окружения
-    token = os.getenv('TELEGRAM_BOT_TOKEN')
-    if not token:
-        logger.error("No token provided!")
-        return
+    # Start Flask server in a separate thread
+    flask_thread = threading.Thread(target=run_flask)
+    flask_thread.start()
 
-    # Создаем приложение бота
-    application = Application.builder().token(token).build()
+    # Start the bot
+    updater = Updater(token=os.environ['TELEGRAM_BOT_TOKEN'], use_context=True)
+    dp = updater.dispatcher
 
-    # Добавляем обработчики команд
-    application.add_handler(CommandHandler("start", start))
-    application.add_handler(CommandHandler("help", help))
-    application.add_handler(CommandHandler("stats", stats))
+    dp.add_handler(MessageHandler(Filters.text & ~Filters.command, process_message))
 
-    # Добавляем обработчик сообщений
-    application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, process_message))
-
-    # Запускаем бота
-    application.run_polling(allowed_updates=Update.ALL_TYPES)
+    updater.start_polling()
+    updater.idle()
 
 if __name__ == '__main__':
     main() 
