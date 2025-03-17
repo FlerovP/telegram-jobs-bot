@@ -1,5 +1,5 @@
 services:
-  - type: postgresql
+  - type: database
     name: telegram-jobs-db
     region: frankfurt
     plan: free
